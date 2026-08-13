@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run an already-provisioned AI Toolkit image inside a Hugging Face Job."""
+"""Run an official AI Toolkit container inside a Hugging Face Job."""
 
 from __future__ import annotations
 
@@ -9,6 +9,9 @@ import subprocess
 from pathlib import Path
 
 from huggingface_hub import HfApi
+
+
+AI_TOOLKIT_DIR = Path("/app/ai-toolkit")
 
 
 def required_env(name: str) -> str:
@@ -26,10 +29,12 @@ def main() -> int:
         raise RuntimeError(f"AI Toolkit config mount is unavailable: {config_path}")
     if not output_root.is_dir():
         raise RuntimeError(f"output bucket mount is unavailable: {output_root}")
+    if not (AI_TOOLKIT_DIR / "run.py").is_file():
+        raise RuntimeError(f"official AI Toolkit installation is unavailable: {AI_TOOLKIT_DIR}")
 
     # Preserve the exact config that produced the output alongside checkpoints.
     shutil.copy2(config_path, output_root / "ai-toolkit-config.yaml")
-    subprocess.run(["python", "run.py", str(config_path)], check=True)
+    subprocess.run(["python", "run.py", str(config_path)], check=True, cwd=AI_TOOLKIT_DIR)
 
     repo_id = required_env("MODEL_REPO")
     api = HfApi(token=token)

@@ -1,6 +1,0 @@
-services:
-  ai-toolkit-job:
-    image: ghcr.io/briancw/ai-toolkit-job:latest
-    build:
-      context: .
-      dockerfile: image/Dockerfile

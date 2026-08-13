@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Launch a containerized AI Toolkit Hugging Face Job from a TOML sidecar.
-
-The image contains a pinned AI Toolkit installation. The local AI Toolkit YAML
-is mounted unchanged and the HF token is sent to the Job as an encrypted secret.
-"""
+"""Launch an official AI Toolkit Hugging Face Job from a TOML sidecar."""
 
 from __future__ import annotations
 
@@ -20,7 +16,8 @@ from huggingface_hub import HfApi
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIGS_DIR = ROOT / "configs"
-CONTAINER_ENTRYPOINT = "/opt/job/run_ai_toolkit_container.py"
+JOB_RUNNER = ROOT / "scripts" / "run_ai_toolkit_container.py"
+JOB_RUNNER_MOUNT = "/mnt/job"
 
 
 def load_dotenv(path: Path) -> None:
@@ -85,6 +82,8 @@ def main() -> int:
         parser.error(str(error))
     if not ai_config.is_file():
         parser.error(f"AI Toolkit config does not exist: {ai_config}")
+    if not JOB_RUNNER.is_file():
+        parser.error(f"AI Toolkit Job runner does not exist: {JOB_RUNNER}")
     try:
         ai_config_relative_path = ai_config.relative_to(CONFIGS_DIR)
     except ValueError:
@@ -122,6 +121,9 @@ def main() -> int:
         # Local config files are uploaded and mounted read-only by HF Jobs. The
         # YAML remains the exact AI Toolkit config we run remotely.
         "--volume", f"{CONFIGS_DIR}:/mnt/config:ro",
+        # This tiny runner provides only final artifact publication; AI Toolkit
+        # itself comes directly from the official image.
+        "--volume", f"{JOB_RUNNER.parent}:{JOB_RUNNER_MOUNT}:ro",
         "--env", f"AI_TOOLKIT_CONFIG=/mnt/config/{ai_config_relative_path.as_posix()}",
         "--env", f"MODEL_REPO={model_repo}",
     ]
@@ -131,7 +133,7 @@ def main() -> int:
         command.extend(["--env", f"{key}={value}"])
     if job.get("detach", False):
         command.append("--detach")
-    command.extend([image_ref, "python", CONTAINER_ENTRYPOINT])
+    command.extend([image_ref, "python", f"{JOB_RUNNER_MOUNT}/{JOB_RUNNER.name}"])
 
     # Do not print environment values or tokens.  The command only refers to the
     # secret by name, and HF stores it encrypted for the remote job.
