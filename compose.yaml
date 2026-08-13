@@ -4,5 +4,3 @@ services:
     build:
       context: .
       dockerfile: image/Dockerfile
-      args:
-        AI_TOOLKIT_REVISION: 0e4b6e8695ae836f463eacfde16de695337492e2

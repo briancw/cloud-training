@@ -2,17 +2,6 @@ name: Publish AI Toolkit training image
 
 on:
   workflow_dispatch:
-    inputs:
-      ai_toolkit_revision:
-        description: Immutable AI Toolkit Git commit to build
-        required: true
-        default: 0e4b6e8695ae836f463eacfde16de695337492e2
-        type: string
-      image_tag:
-        description: GHCR tag to publish
-        required: true
-        default: latest
-        type: string
 
 permissions:
   contents: read
@@ -39,8 +28,6 @@ jobs:
           context: .
           file: image/Dockerfile
           push: true
-          build-args: |
-            AI_TOOLKIT_REVISION=${{ inputs.ai_toolkit_revision }}
-          tags: ghcr.io/${{ github.repository_owner }}/ai-toolkit-job:${{ inputs.image_tag }}
+          tags: ghcr.io/${{ github.repository_owner }}/ai-toolkit-job:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
