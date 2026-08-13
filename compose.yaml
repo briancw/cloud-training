@@ -1,0 +1,8 @@
+services:
+  ai-toolkit-job:
+    image: ghcr.io/briancw/ai-toolkit-job:latest
+    build:
+      context: .
+      dockerfile: image/Dockerfile
+      args:
+        AI_TOOLKIT_REVISION: 0e4b6e8695ae836f463eacfde16de695337492e2

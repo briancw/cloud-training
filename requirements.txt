@@ -1,0 +1,3 @@
+# Provides the `hf` CLI used by scripts/push_training_data.py and
+# scripts/launch_hf_job.py.  Install with: python -m pip install -r requirements.txt
+huggingface_hub>=1.8.0

@@ -1,0 +1,8 @@
+.env
+.hf-cache/
+hf-space/.cache/
+__pycache__/
+*.py[cod]
+
+# Training images belong in the Hugging Face bucket, not in source control.
+training-data/
